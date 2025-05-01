@@ -191,17 +191,16 @@ while True:
         # Meteor-ship collisions
         ship_mask = pygame.mask.from_surface(ship_surf)
         meteor_mask = pygame.mask.from_surface(meteor_surf)
-        for meteor_tuple in meteor_list:
-            meteor_rect = meteor_tuple[0]
-            offset_x = meteor_rect.left - ship_rect.left
-            offset_y = meteor_rect.top - ship_rect.top
-            
-
         for meteor_tuple in meteor_list[:]:
             meteor_rect = meteor_tuple[0]
-            if ship_rect.colliderect(meteor_rect):
-                explosion_sound.play()
-                game_active = False  # Game over instead of immediate exit
+            if ship_rect.colliderect(meteor_rect): #This line is still useful for optimization
+                offset_x = meteor_rect.left - ship_rect.left
+                offset_y = meteor_rect.top - ship_rect.top
+                overlap = ship_mask.overlap(meteor_mask, (offset_x, offset_y))
+                if overlap:
+                    explosion_sound.play()
+                    game_active = False  # Game over instead of immediate exit
+                    break #Exit the loop after a collision is detected
         
         # Laser-meteor collisions
         for laser_rect in laser_list[:]:
