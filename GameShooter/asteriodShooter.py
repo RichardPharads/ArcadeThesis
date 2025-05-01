@@ -1,6 +1,9 @@
-import pygame, sys
+import pygame, sys , os
+
 from random import randint, uniform
 from pygame.locals import *
+current_dir = os.path.dirname(__file__)
+
 
 def laser_update(laser_list, speed=300):
     for rect in laser_list[:]:  # Iterate over a copy to safely remove items
@@ -33,7 +36,7 @@ def laser_cooldown(can_shoot, duration=0):
 # Game init 
 pygame.init()
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
-display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), FULLSCREEN)
 pygame.display.set_caption('Meteor Shooter')
 clock = pygame.time.Clock()
 
@@ -48,14 +51,18 @@ DEADZONE = 0.2
 SHIP_SPEED = 800  # Higher speed for smoother controller movement
 
 # Ship import
-ship_surf = pygame.image.load("graphics/ship2.png").convert_alpha()
+ship_path = os.path.join(current_dir, "graphics", "ship2.png")
+
+ship_surf = pygame.image.load(ship_path).convert_alpha()
 ship_rect = ship_surf.get_rect(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
 
 # Background 
-bg_surf = pygame.image.load("graphics/images.png").convert()
+bg_path = os.path.join(current_dir, "graphics", "background.png")
+bg_surf = pygame.image.load(bg_path).convert()
 
 # Laser import
-laser_surf = pygame.image.load("graphics/laser.png").convert_alpha()
+laser_path = os.path.join(current_dir, "graphics", "laser.png")
+laser_surf = pygame.image.load(laser_path).convert_alpha()
 laser_list = []
 
 # Laser cooldown
@@ -63,10 +70,12 @@ can_shoot = True
 shoot_time = None
 
 # Importing text
-font = pygame.font.Font("graphics/subatomic.ttf", 50)
+font_path = os.path.join(current_dir, "graphics", "subatomic.ttf")
+font = pygame.font.Font(font_path, 50)
 
 # Meteor import
-meteor_surf = pygame.image.load("graphics/waterbottle.png").convert_alpha()
+meteor_path = os.path.join(current_dir, "graphics", "waterbottle.png")
+meteor_surf = pygame.image.load(meteor_path).convert_alpha()
 meteor_list = []
 
 # Meteor timer
@@ -74,9 +83,12 @@ meteor_timer = pygame.event.custom_type()
 pygame.time.set_timer(meteor_timer, 500)
 
 # Import sound
-laser_sound = pygame.mixer.Sound("sounds/laser.ogg")
-explosion_sound = pygame.mixer.Sound("sounds/explosion.wav")
-bg_music = pygame.mixer.Sound("sounds/music.wav")
+laser_sound_path = os.path.join(current_dir, "sounds", "laser.ogg")
+laser_sound = pygame.mixer.Sound(laser_sound_path)
+explosion_sound_path = os.path.join(current_dir, "sounds", "explosion.wav")
+explosion_sound = pygame.mixer.Sound(explosion_sound_path)
+bg_music_path = os.path.join(current_dir, "sounds", "music.wav")
+bg_music = pygame.mixer.Sound(bg_music_path)
 bg_music.play(loops=-1)
 
 # Game state
@@ -88,7 +100,13 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
         
+
+
         # Controller connection/disconnection handling
         if event.type == JOYDEVICEADDED:
             joysticks = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
