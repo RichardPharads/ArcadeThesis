@@ -1,0 +1,241 @@
+import pygame, sys
+from random import randint, uniform
+from pygame.locals import *
+
+def laser_update(laser_list, speed=300):
+    for rect in laser_list[:]:  # Iterate over a copy to safely remove items
+        rect.y -= speed * dt
+        if rect.bottom < 0:
+            laser_list.remove(rect)
+
+def meteor_update(meteor_list, speed=200):
+    for meteor_tuple in meteor_list[:]:  # Iterate over a copy to safely remove items
+        direction = meteor_tuple[1]
+        meteor_rect = meteor_tuple[0]
+        meteor_rect.center += direction * speed * dt
+        if meteor_rect.top > WINDOW_HEIGHT:
+            meteor_list.remove(meteor_tuple)            
+
+def display_score():
+    score_text = f'Survival Score: {pygame.time.get_ticks() // 1000}'
+    text_surf = font.render(score_text, True, (255,255,255))
+    text_rect = text_surf.get_rect(midbottom=(WINDOW_WIDTH/2, WINDOW_HEIGHT-80))
+    display_surface.blit(text_surf, text_rect)
+    pygame.draw.rect(display_surface, (255,255,255), text_rect.inflate(30,30), width=8, border_radius=5)
+
+def laser_cooldown(can_shoot, duration=0):
+    if not can_shoot:
+        current_time = pygame.time.get_ticks()
+        if current_time - shoot_time > duration:
+            can_shoot = True
+    return can_shoot        
+
+# Game init 
+pygame.init()
+WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
+display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption('Meteor Shooter')
+clock = pygame.time.Clock()
+
+# Controller setup
+pygame.joystick.init()
+joysticks = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
+for joystick in joysticks:
+    joystick.init()
+
+# Deadzone for analog sticks and movement speed
+DEADZONE = 0.2
+SHIP_SPEED = 800  # Higher speed for smoother controller movement
+
+# Ship import
+ship_surf = pygame.image.load("graphics/ship2.png").convert_alpha()
+ship_rect = ship_surf.get_rect(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
+
+# Background 
+bg_surf = pygame.image.load("graphics/images.png").convert()
+
+# Laser import
+laser_surf = pygame.image.load("graphics/laser.png").convert_alpha()
+laser_list = []
+
+# Laser cooldown
+can_shoot = True
+shoot_time = None
+
+# Importing text
+font = pygame.font.Font("graphics/subatomic.ttf", 50)
+
+# Meteor import
+meteor_surf = pygame.image.load("graphics/waterbottle.png").convert_alpha()
+meteor_list = []
+
+# Meteor timer
+meteor_timer = pygame.event.custom_type()
+pygame.time.set_timer(meteor_timer, 500)
+
+# Import sound
+laser_sound = pygame.mixer.Sound("sounds/laser.ogg")
+explosion_sound = pygame.mixer.Sound("sounds/explosion.wav")
+bg_music = pygame.mixer.Sound("sounds/music.wav")
+bg_music.play(loops=-1)
+
+# Game state
+game_active = True
+
+while True:
+    # Event loop
+    for event in pygame.event.get():    
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        
+        # Controller connection/disconnection handling
+        if event.type == JOYDEVICEADDED:
+            joysticks = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
+            for joystick in joysticks:
+                joystick.init()
+        elif event.type == JOYDEVICEREMOVED:
+            joysticks = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
+        
+        # Controller button press (for shooting)
+        if event.type == JOYBUTTONDOWN and can_shoot and game_active:
+            # Check common shoot buttons (A/X on Xbox-style, Cross/Circle on PlayStation)
+            if event.button in (0, 1, 2, 3):  # Adjust based on your controller
+                laser_rect = laser_surf.get_rect(midbottom=ship_rect.midtop)
+                laser_list.append(laser_rect)
+                can_shoot = False
+                shoot_time = pygame.time.get_ticks()
+                laser_sound.play()
+        
+        # Keyboard shooting (spacebar)
+        if event.type == KEYDOWN and can_shoot and game_active:
+            if event.key == K_SPACE:
+                laser_rect = laser_surf.get_rect(midbottom=ship_rect.midtop)
+                laser_list.append(laser_rect)
+                can_shoot = False
+                shoot_time = pygame.time.get_ticks()
+                laser_sound.play()
+        
+        if event.type == meteor_timer and game_active:
+            x_pos = randint(-100, WINDOW_WIDTH + 100)
+            y_pos = randint(-100, -50)
+            meteor_rect = meteor_surf.get_rect(center=(x_pos, y_pos))
+            direction = pygame.math.Vector2(uniform(-0.5, 0.5), 1)
+            meteor_list.append((meteor_rect, direction))
+
+    # Delta time for frame-rate independent movement
+    dt = clock.tick(120) / 1000
+
+    if game_active:
+        # Controller movement
+        if joysticks:
+            joystick = joysticks[0]  # Use first controller
+            
+            # Left stick movement with deadzone
+            axis_x = joystick.get_axis(0)
+            axis_y = joystick.get_axis(1)
+            
+            # Apply deadzone and normalize
+            if abs(axis_x) < DEADZONE:
+                axis_x = 0
+            else:
+                axis_x = (abs(axis_x) - DEADZONE) * (axis_x / abs(axis_x))
+            
+            if abs(axis_y) < DEADZONE:
+                axis_y = 0
+            else:
+                axis_y = (abs(axis_y) - DEADZONE) * (axis_y / abs(axis_y))
+            
+            # Move ship based on controller input
+            ship_rect.x += int(axis_x * SHIP_SPEED * dt)
+            ship_rect.y += int(axis_y * SHIP_SPEED * dt)
+        
+        # Mouse movement (only if no controller connected)
+        if not joysticks:
+            ship_rect.center = pygame.mouse.get_pos()
+        
+        # Keep ship on screen
+        ship_rect.clamp_ip(pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT))
+        
+        # Shooting (mouse or controller button held)
+        if (pygame.mouse.get_pressed()[0] or (joysticks and joystick.get_button(0))) and can_shoot:
+            laser_rect = laser_surf.get_rect(midbottom=ship_rect.midtop)
+            laser_list.append(laser_rect)
+            can_shoot = False
+            shoot_time = pygame.time.get_ticks()
+            laser_sound.play()
+        
+        # Update game elements
+        laser_update(laser_list)
+        meteor_update(meteor_list)
+        can_shoot = laser_cooldown(can_shoot, 400)
+        
+        # Meteor-ship collisions
+        ship_mask = pygame.mask.from_surface(ship_surf)
+        meteor_mask = pygame.mask.from_surface(meteor_surf)
+        for meteor_tuple in meteor_list:
+            meteor_rect = meteor_tuple[0]
+            offset_x = meteor_rect.left - ship_rect.left
+            offset_y = meteor_rect.top - ship_rect.top
+            
+
+        for meteor_tuple in meteor_list[:]:
+            meteor_rect = meteor_tuple[0]
+            if ship_rect.colliderect(meteor_rect):
+                explosion_sound.play()
+                game_active = False  # Game over instead of immediate exit
+        
+        # Laser-meteor collisions
+        for laser_rect in laser_list[:]:
+            for meteor_tuple in meteor_list[:]:
+                if laser_rect.colliderect(meteor_tuple[0]):
+                    meteor_list.remove(meteor_tuple)
+                    laser_list.remove(laser_rect)
+                    explosion_sound.play()
+                    break
+
+    # Drawing
+    display_surface.blit(bg_surf, (0, 0))
+    
+    if game_active:
+        for rect in laser_list:
+            display_surface.blit(laser_surf, rect)
+        
+        for meteor_tuple in meteor_list:
+            display_surface.blit(meteor_surf, meteor_tuple[0])
+        
+        display_surface.blit(ship_surf, ship_rect)
+        display_score()
+    else:
+        # Game over screen
+        game_over_text = font.render("GAME OVER", True, (255, 0, 0))
+        restart_text = font.render("Press Button O to restart", True, (255, 255, 255))
+        display_surface.blit(game_over_text, (WINDOW_WIDTH/2 - game_over_text.get_width()/2, WINDOW_HEIGHT/2 - 50))
+        display_surface.blit(restart_text, (WINDOW_WIDTH/2 - restart_text.get_width()/2, WINDOW_HEIGHT/2 + 50))
+        
+        # Restart game
+        keys = pygame.key.get_pressed()
+        if keys[K_r]:
+            game_active = True
+            ship_rect.center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2)
+            laser_list.clear()
+            meteor_list.clear()
+            can_shoot = True
+            pygame.time.set_timer(meteor_timer, 500)  # Reset meteor timer
+        if event.type == pygame.JOYBUTTONDOWN and not game_active:
+            if event.button == 1:  # Circle button (adjust if needed)
+                game_active = True
+                ship_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+                laser_list.clear()
+                meteor_list.clear()
+                can_shoot = True
+                pygame.time.set_timer(meteor_timer, 500)
+
+            if event.button == 2:  # Square button (adjust if needed)
+               pygame.quit()
+               sys.exit()
+            
+
+		
+
+    pygame.display.update()
