@@ -57,7 +57,7 @@ ship_surf = pygame.image.load(ship_path).convert_alpha()
 ship_rect = ship_surf.get_rect(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
 
 # Background 
-bg_path = os.path.join(current_dir, "graphics", "background.png")
+bg_path = os.path.join(current_dir, "graphics", "images.png")
 bg_surf = pygame.image.load(bg_path).convert()
 
 # Laser import
