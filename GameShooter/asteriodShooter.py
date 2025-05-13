@@ -1,9 +1,57 @@
-import pygame, sys , os
-
+import pygame, sys, os
 from random import randint, uniform
 from pygame.locals import *
-current_dir = os.path.dirname(__file__)
 
+class AssetManager:
+    def __init__(self):
+        self.current_dir = os.path.dirname(__file__)
+        self.graphics = {}
+        self.sounds = {}
+        self.fonts = {}
+        
+        # Define asset paths
+        self.asset_paths = {
+            'graphics': {
+                'ship': "graphics/ship2.png",
+                'background': "graphics/images.png",
+                'laser': "graphics/laser.png",
+                'meteor': "graphics/waterbottle.png"
+            },
+            'sounds': {
+                'laser': "sounds/laser.ogg",
+                'explosion': "sounds/explosion.wav",
+                'background_music': "sounds/music.wav"
+            },
+            'fonts': {
+                'main': "graphics/subatomic.ttf"
+            }
+        }
+        
+        self.load_all_assets()
+    
+    def get_path(self, file_path):
+        return os.path.join(self.current_dir, file_path)
+    
+    def load_all_assets(self):
+        # Load graphics
+        for key, path in self.asset_paths['graphics'].items():
+            full_path = self.get_path(path)
+            self.graphics[key] = pygame.image.load(full_path).convert_alpha()
+            
+        # Special case for background to use convert() instead of convert_alpha()
+        self.graphics['background'] = pygame.image.load(
+            self.get_path(self.asset_paths['graphics']['background'])
+        ).convert()
+        
+        # Load sounds
+        for key, path in self.asset_paths['sounds'].items():
+            full_path = self.get_path(path)
+            self.sounds[key] = pygame.mixer.Sound(full_path)
+            
+        # Load fonts
+        for key, path in self.asset_paths['fonts'].items():
+            full_path = self.get_path(path)
+            self.fonts[key] = pygame.font.Font(full_path, 50)
 
 def laser_update(laser_list, speed=300):
     for rect in laser_list[:]:  # Iterate over a copy to safely remove items
@@ -21,7 +69,7 @@ def meteor_update(meteor_list, speed=200):
 
 def display_score():
     score_text = f'Survival Score: {pygame.time.get_ticks() // 1000}'
-    text_surf = font.render(score_text, True, (255,255,255))
+    text_surf = assets.fonts['main'].render(score_text, True, (255,255,255))
     text_rect = text_surf.get_rect(midbottom=(WINDOW_WIDTH/2, WINDOW_HEIGHT-80))
     display_surface.blit(text_surf, text_rect)
     pygame.draw.rect(display_surface, (255,255,255), text_rect.inflate(30,30), width=8, border_radius=5)
@@ -40,6 +88,9 @@ display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), FULLSCR
 pygame.display.set_caption('Meteor Shooter')
 clock = pygame.time.Clock()
 
+# Initialize asset manager
+assets = AssetManager()
+
 # Controller setup
 pygame.joystick.init()
 joysticks = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
@@ -50,46 +101,21 @@ for joystick in joysticks:
 DEADZONE = 0.2
 SHIP_SPEED = 800  # Higher speed for smoother controller movement
 
-# Ship import
-ship_path = os.path.join(current_dir, "graphics", "ship2.png")
-
-ship_surf = pygame.image.load(ship_path).convert_alpha()
-ship_rect = ship_surf.get_rect(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
-
-# Background 
-bg_path = os.path.join(current_dir, "graphics", "images.png")
-bg_surf = pygame.image.load(bg_path).convert()
-
-# Laser import
-laser_path = os.path.join(current_dir, "graphics", "laser.png")
-laser_surf = pygame.image.load(laser_path).convert_alpha()
+# Game objects setup
+ship_rect = assets.graphics['ship'].get_rect(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
 laser_list = []
+meteor_list = []
 
 # Laser cooldown
 can_shoot = True
 shoot_time = None
 
-# Importing text
-font_path = os.path.join(current_dir, "graphics", "subatomic.ttf")
-font = pygame.font.Font(font_path, 50)
-
-# Meteor import
-meteor_path = os.path.join(current_dir, "graphics", "waterbottle.png")
-meteor_surf = pygame.image.load(meteor_path).convert_alpha()
-meteor_list = []
+# Start background music
+assets.sounds['background_music'].play(loops=-1)
 
 # Meteor timer
 meteor_timer = pygame.event.custom_type()
 pygame.time.set_timer(meteor_timer, 500)
-
-# Import sound
-laser_sound_path = os.path.join(current_dir, "sounds", "laser.ogg")
-laser_sound = pygame.mixer.Sound(laser_sound_path)
-explosion_sound_path = os.path.join(current_dir, "sounds", "explosion.wav")
-explosion_sound = pygame.mixer.Sound(explosion_sound_path)
-bg_music_path = os.path.join(current_dir, "sounds", "music.wav")
-bg_music = pygame.mixer.Sound(bg_music_path)
-bg_music.play(loops=-1)
 
 # Game state
 game_active = True
@@ -105,8 +131,6 @@ while True:
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
         
-
-
         # Controller connection/disconnection handling
         if event.type == JOYDEVICEADDED:
             joysticks = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
@@ -119,25 +143,25 @@ while True:
         if event.type == JOYBUTTONDOWN and can_shoot and game_active:
             # Check common shoot buttons (A/X on Xbox-style, Cross/Circle on PlayStation)
             if event.button in (0, 1, 2, 3):  # Adjust based on your controller
-                laser_rect = laser_surf.get_rect(midbottom=ship_rect.midtop)
+                laser_rect = assets.graphics['laser'].get_rect(midbottom=ship_rect.midtop)
                 laser_list.append(laser_rect)
                 can_shoot = False
                 shoot_time = pygame.time.get_ticks()
-                laser_sound.play()
+                assets.sounds['laser'].play()
         
         # Keyboard shooting (spacebar)
         if event.type == KEYDOWN and can_shoot and game_active:
             if event.key == K_SPACE:
-                laser_rect = laser_surf.get_rect(midbottom=ship_rect.midtop)
+                laser_rect = assets.graphics['laser'].get_rect(midbottom=ship_rect.midtop)
                 laser_list.append(laser_rect)
                 can_shoot = False
                 shoot_time = pygame.time.get_ticks()
-                laser_sound.play()
+                assets.sounds['laser'].play()
         
         if event.type == meteor_timer and game_active:
             x_pos = randint(-100, WINDOW_WIDTH + 100)
             y_pos = randint(-100, -50)
-            meteor_rect = meteor_surf.get_rect(center=(x_pos, y_pos))
+            meteor_rect = assets.graphics['meteor'].get_rect(center=(x_pos, y_pos))
             direction = pygame.math.Vector2(uniform(-0.5, 0.5), 1)
             meteor_list.append((meteor_rect, direction))
 
@@ -177,11 +201,11 @@ while True:
         
         # Shooting (mouse or controller button held)
         if (pygame.mouse.get_pressed()[0] or (joysticks and joystick.get_button(0))) and can_shoot:
-            laser_rect = laser_surf.get_rect(midbottom=ship_rect.midtop)
+            laser_rect = assets.graphics['laser'].get_rect(midbottom=ship_rect.midtop)
             laser_list.append(laser_rect)
             can_shoot = False
             shoot_time = pygame.time.get_ticks()
-            laser_sound.play()
+            assets.sounds['laser'].play()
         
         # Update game elements
         laser_update(laser_list)
@@ -189,8 +213,8 @@ while True:
         can_shoot = laser_cooldown(can_shoot, 400)
         
         # Meteor-ship collisions
-        ship_mask = pygame.mask.from_surface(ship_surf)
-        meteor_mask = pygame.mask.from_surface(meteor_surf)
+        ship_mask = pygame.mask.from_surface(assets.graphics['ship'])
+        meteor_mask = pygame.mask.from_surface(assets.graphics['meteor'])
         for meteor_tuple in meteor_list[:]:
             meteor_rect = meteor_tuple[0]
             if ship_rect.colliderect(meteor_rect): #This line is still useful for optimization
@@ -198,7 +222,7 @@ while True:
                 offset_y = meteor_rect.top - ship_rect.top
                 overlap = ship_mask.overlap(meteor_mask, (offset_x, offset_y))
                 if overlap:
-                    explosion_sound.play()
+                    assets.sounds['explosion'].play()
                     game_active = False  # Game over instead of immediate exit
                     break #Exit the loop after a collision is detected
         
@@ -208,25 +232,25 @@ while True:
                 if laser_rect.colliderect(meteor_tuple[0]):
                     meteor_list.remove(meteor_tuple)
                     laser_list.remove(laser_rect)
-                    explosion_sound.play()
+                    assets.sounds['explosion'].play()
                     break
 
     # Drawing
-    display_surface.blit(bg_surf, (0, 0))
+    display_surface.blit(assets.graphics['background'], (0, 0))
     
     if game_active:
         for rect in laser_list:
-            display_surface.blit(laser_surf, rect)
+            display_surface.blit(assets.graphics['laser'], rect)
         
         for meteor_tuple in meteor_list:
-            display_surface.blit(meteor_surf, meteor_tuple[0])
+            display_surface.blit(assets.graphics['meteor'], meteor_tuple[0])
         
-        display_surface.blit(ship_surf, ship_rect)
+        display_surface.blit(assets.graphics['ship'], ship_rect)
         display_score()
     else:
         # Game over screen
-        game_over_text = font.render("GAME OVER", True, (255, 0, 0))
-        restart_text = font.render("Press Button O to restart", True, (255, 255, 255))
+        game_over_text = assets.fonts['main'].render("GAME OVER", True, (255, 0, 0))
+        restart_text = assets.fonts['main'].render("Press Button O to restart", True, (255, 255, 255))
         display_surface.blit(game_over_text, (WINDOW_WIDTH/2 - game_over_text.get_width()/2, WINDOW_HEIGHT/2 - 50))
         display_surface.blit(restart_text, (WINDOW_WIDTH/2 - restart_text.get_width()/2, WINDOW_HEIGHT/2 + 50))
         
@@ -252,7 +276,5 @@ while True:
                pygame.quit()
                sys.exit()
             
-
-		
 
     pygame.display.update()

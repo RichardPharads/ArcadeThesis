@@ -33,7 +33,7 @@ background = load_image("background.png", (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Player setup
 player_surf = load_image("king.png", (150, 150))
-player_rect = player_surf.get_frect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+player_rect = player_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
 player_direction = Vector2()  # For horizontal movement
 player_speed = 400
 facing_right = True  # Track which way player is facing
