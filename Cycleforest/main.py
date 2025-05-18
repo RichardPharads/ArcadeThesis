@@ -3,13 +3,23 @@ import sys
 import random
 from os.path import join
 from pygame.math import Vector2
+from assets_config import AssetLoader
 
 # Initialize pygame and mixer
 pygame.init()
 pygame.mixer.init()
 
+# Initialize asset loader with default theme
+asset_loader = AssetLoader("default")
+
+# Verify assets exist
+if not asset_loader.verify_assets_exist():
+    print("Error: Some required assets are missing. Please check the assets directories.")
+    pygame.quit()
+    sys.exit(1)
+
 # Load and play music
-pygame.mixer.music.load(join('music', 'time_for_adventure.mp3'))
+pygame.mixer.music.load(asset_loader.get_music_path())
 pygame.mixer.music.play(-1)
 
 # Set up display
@@ -21,7 +31,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 # Load images
 def load_image(name, scale=None):
     try:
-        img = pygame.image.load(join('image', name)).convert_alpha()
+        img = pygame.image.load(asset_loader.get_image_path(name)).convert_alpha()
         return pygame.transform.scale(img, scale) if scale else img
     except:
         print(f"Failed to load image: {name}")
@@ -29,10 +39,10 @@ def load_image(name, scale=None):
 
 
 # Background
-background = load_image("background.png", (SCREEN_WIDTH, SCREEN_HEIGHT))
+background = load_image("background", (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Player setup
-player_surf = load_image("king.png", (150, 150))
+player_surf = load_image("player", asset_loader.get_scale("player"))
 player_rect = player_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
 player_direction = Vector2()  # For horizontal movement
 player_speed = 400
@@ -43,14 +53,14 @@ invincible_timer = 0
 invincible_duration = 1.0  # 1 second of invincibility after hit
 
 # Fire projectile setup
-fire_surf = load_image("fire.png", (60, 60))
+fire_surf = load_image("projectile", asset_loader.get_scale("projectile"))
 fire_projectiles = []
 fire_speed = 600
 fire_cooldown = 0.3  # seconds between shots
 last_fire_time = 0
 
 # Monster setup
-monster_surf = load_image("monster.png", (200, 200))
+monster_surf = load_image("monster", asset_loader.get_scale("monster"))
 monsters = []
 monster_spawn_timer = 0
 monster_spawn_interval = 2.0  # seconds between spawns
@@ -247,6 +257,23 @@ def draw_score():
     screen.blit(score_text, (SCREEN_WIDTH - 150, 10))
 
 
+def change_theme(new_theme):
+    """Change the game theme and reload all assets"""
+    global background, player_surf, fire_surf, monster_surf
+    
+    asset_loader.change_theme(new_theme)
+    
+    # Reload all assets with new theme
+    background = load_image("background", (SCREEN_WIDTH, SCREEN_HEIGHT))
+    player_surf = load_image("player", asset_loader.get_scale("player"))
+    fire_surf = load_image("projectile", asset_loader.get_scale("projectile"))
+    monster_surf = load_image("monster", asset_loader.get_scale("monster"))
+    
+    # Load and play new music
+    pygame.mixer.music.load(asset_loader.get_music_path())
+    pygame.mixer.music.play(-1)
+
+
 # Main game loop
 while running:
     dt = clock.tick(60) / 1000  # Delta time in seconds
@@ -270,7 +297,7 @@ while running:
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
             running = False
 
-        # Music controls
+        # Music and theme controls
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
                 pygame.mixer.music.pause()
@@ -278,6 +305,12 @@ while running:
                 pygame.mixer.music.unpause()
             elif event.key == pygame.K_x:  # Fire projectile with X key
                 fire_projectile()
+            # Theme switching with number keys
+            elif event.key in [pygame.K_1, pygame.K_2]:
+                themes = asset_loader.get_available_themes()
+                theme_index = event.key - pygame.K_1
+                if theme_index < len(themes):
+                    change_theme(themes[theme_index])
 
         # Controller button events
         if joystick and event.type == pygame.JOYBUTTONDOWN:
