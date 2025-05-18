@@ -1,5 +1,6 @@
 import pygame, sys
 from os import walk
+from utils import get_asset_path
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self, pos, groups, collision_sprites):
@@ -11,6 +12,7 @@ class Player(pygame.sprite.Sprite):
 		self.status = 'down'
 		self.image = self.animations[self.status][self.frame_index]
 		self.rect = self.image.get_rect(center = pos)
+		self.mask = pygame.mask.from_surface(self.image)  # Create mask from initial image
 
 		# float based movement
 		self.pos = pygame.math.Vector2(self.rect.center)
@@ -67,16 +69,21 @@ class Player(pygame.sprite.Sprite):
 
 	def import_assets(self):
 		self.animations = {}
-		for index, folder in enumerate(walk('../TrafficDash/graphics/player')):
-			if index == 0:
-				for name in folder[1]:
-					self.animations[name] = []
-			else:
-				for file_name in folder[2]:
-					path = folder[0].replace('\\', '/') + '/' + file_name
-					surf = pygame.image.load(path).convert_alpha()
-					key = folder[0].split('\\')[1]
-					self.animations[key].append(surf)
+		player_path = get_asset_path('TrafficDash', 'graphics', 'player')
+		
+		# Get all animation folders
+		for _, folders, _ in walk(player_path):
+			for folder in folders:
+				self.animations[folder] = []
+				
+				# Get all images in the animation folder
+				folder_path = get_asset_path('TrafficDash', 'graphics', 'player', folder)
+				for _, _, files in walk(folder_path):
+					for file in sorted(files):  # Sort files to ensure consistent order
+						if file.endswith('.png'):
+							image_path = get_asset_path('TrafficDash', 'graphics', 'player', folder, file)
+							surf = pygame.image.load(image_path).convert_alpha()
+							self.animations[folder].append(surf)
 
 	def move(self, dt):
 
@@ -164,6 +171,7 @@ class Player(pygame.sprite.Sprite):
 			self.frame_index = 0	
 		
 		self.image = current_animations[int(self.frame_index)]
+		self.mask = pygame.mask.from_surface(self.image)  # Update mask when image changes
 
 	def restrict(self):
 		if self.rect.left < 640:
@@ -178,7 +186,11 @@ class Player(pygame.sprite.Sprite):
 			self.pos.y = 3500 - self.rect.height / 2
 			self.rect.bottom = 3500
 			self.hitbox.centery = self.rect.centery
-			
+		# Prevent moving up when below y=1180
+		if self.pos.y > 1180 and self.direction.y < 0:
+			self.direction.y = 0
+			self.pos.y = max(self.pos.y, 1180 + self.rect.height / 2)
+
 	def update(self, dt):
 		self.input()
 		self.move(dt)

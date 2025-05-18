@@ -1,15 +1,23 @@
 import pygame
 from os import walk
 from random import choice
+from utils import get_asset_path
 
 class Car(pygame.sprite.Sprite):
 	def __init__(self,pos,groups):
 		super().__init__(groups)
 		self.name = 'car'
 
-		for _, _, img_list in walk("../TrafficDash/graphics/cars"):
-			car_name = choice(img_list) 
-		self.image = pygame.image.load("../TrafficDash/graphics/cars/" + car_name).convert_alpha()
+		# Get list of available car images
+		cars_path = get_asset_path('TrafficDash', 'graphics', 'cars')
+		car_images = []
+		for _, _, files in walk(cars_path):
+			car_images = [f for f in files if f.endswith('.png')]
+		
+		# Choose a random car image
+		car_name = choice(car_images)
+		car_image_path = get_asset_path('TrafficDash', 'graphics', 'cars', car_name)
+		self.image = pygame.image.load(car_image_path).convert_alpha()
 		self.rect = self.image.get_rect(center = pos)
 
 		# float based movement
@@ -29,7 +37,7 @@ class Car(pygame.sprite.Sprite):
 	def update(self,dt):
 		self.pos += self.direction * self.speed * dt
 		self.hitbox.center = (round(self.pos.x), round(self.pos.y))
-		self.rect.center = 	self.hitbox.center
+		self.rect.center = self.hitbox.center
 
 		if not -200 < self.rect.x < 3400:
 			self.kill()
