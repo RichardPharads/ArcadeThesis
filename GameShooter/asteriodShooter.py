@@ -84,7 +84,7 @@ def laser_cooldown(can_shoot, duration=0):
 # Game init 
 pygame.init()
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
-display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), FULLSCREEN)
+display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption('Meteor Shooter')
 clock = pygame.time.Clock()
 
