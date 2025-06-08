@@ -28,7 +28,7 @@ results = model.predict(
     source=picam2.camera_id,  # Use Pi Camera as source
     show=True,                # Show the live feed with predictions
     conf=0.3,                 # Confidence threshold
-    classes=[39],             # COCO class index for 'bottle'
+    classes=[39, 0],             # COCO class index for 'bottle'
     stream=True               # Enable real-time streaming
 )
 

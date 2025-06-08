@@ -248,33 +248,8 @@ while True:
         display_surface.blit(assets.graphics['ship'], ship_rect)
         display_score()
     else:
-        # Game over screen
-        game_over_text = assets.fonts['main'].render("GAME OVER", True, (255, 0, 0))
-        restart_text = assets.fonts['main'].render("Press Button O to restart", True, (255, 255, 255))
-        display_surface.blit(game_over_text, (WINDOW_WIDTH/2 - game_over_text.get_width()/2, WINDOW_HEIGHT/2 - 50))
-        display_surface.blit(restart_text, (WINDOW_WIDTH/2 - restart_text.get_width()/2, WINDOW_HEIGHT/2 + 50))
-        
-        # Restart game
-        keys = pygame.key.get_pressed()
-        if keys[K_r]:
-            game_active = True
-            ship_rect.center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2)
-            laser_list.clear()
-            meteor_list.clear()
-            can_shoot = True
-            pygame.time.set_timer(meteor_timer, 500)  # Reset meteor timer
-        if event.type == pygame.JOYBUTTONDOWN and not game_active:
-            if event.button == 1:  # Circle button (adjust if needed)
-                game_active = True
-                ship_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
-                laser_list.clear()
-                meteor_list.clear()
-                can_shoot = True
-                pygame.time.set_timer(meteor_timer, 500)
-
-            if event.button == 2:  # Square button (adjust if needed)
-               pygame.quit()
-               sys.exit()
-            
+        # Quit game when game over
+        pygame.quit()
+        sys.exit()
 
     pygame.display.update()

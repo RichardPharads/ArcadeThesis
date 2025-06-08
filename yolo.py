@@ -20,7 +20,7 @@ results = model.predict(
     source=0,             # 0 = default webcam
     show=True,            # Show the live feed with predictions
     conf=0.3,             # Confidence threshold
-    classes=[39],         # COCO class index for 'bottle'
+    classes=[39 ,0],         # COCO class index for 'bottle'
     stream=True           # Enable real-time streaming
 )
 
