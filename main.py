@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout , QLabel
 import subprocess
 import sys
+import os
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -34,13 +35,20 @@ class MainWindow(QWidget):
         self.setLayout(layout)
 
     def launch_game(self):
-        subprocess.Popen([sys.executable, "GameShooter/asteriodShooter.py"])
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        subprocess.Popen([sys.executable, os.path.join(current_dir, "GameShooter", "asteriodShooter.py")])
 
     def launch_game2(self):
-        subprocess.Popen([sys.executable, "Cycleforest/main.py"])
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        subprocess.Popen([sys.executable, os.path.join(current_dir, "Cycleforest", "main.py")])
 
     def launch_game3(self):
-        subprocess.Popen([sys.executable, "TrafficDash/main.py"])
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        subprocess.Popen([sys.executable, os.path.join(current_dir, "TrafficDash", "main.py")])
+
+    def closeEvent(self, event):
+        subprocess.Popen([sys.executable, "app.py"])
+        event.accept()
 
 app = QApplication(sys.argv)
 window = MainWindow()
