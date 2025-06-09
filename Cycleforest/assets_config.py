@@ -13,9 +13,9 @@ THEMES = {
         "background": "background.png",
         "music": "time_for_adventure.mp3",
         "scale": {
-            "player": (150, 150),
-            "monster": (200, 200),
-            "projectile": (60, 60),
+            "player": (100, 100),
+            "monster": (120, 120),
+            "projectile": (40, 40),
         }
     },
     "forest": {
@@ -25,9 +25,9 @@ THEMES = {
         "background": "forest_bg.png",
         "music": "forest_theme.mp3",
         "scale": {
-            "player": (150, 150),
-            "monster": (200, 200),
-            "projectile": (60, 60),
+            "player": (100, 100),
+            "monster": (120, 120),
+            "projectile": (40, 40),
         }
     },
     # Add more themes here
