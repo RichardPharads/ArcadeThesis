@@ -4,6 +4,10 @@ import sys
 import os
 import time
 import cv2
+import numpy as np
+from picamera2 import Picamera2
+from picamera2.encoders import JpegEncoder
+from picamera2.outputs import FileOutput
 
 def launch_main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,26 +15,17 @@ def launch_main():
     # Close the current script after launching main.py
     sys.exit(0)
 
-# Initialize camera using OpenCV
-print("Attempting to initialize camera...")
-cap = cv2.VideoCapture(1)  # Try changing 0 to 1 or 2
+# Initialize Raspberry Pi Camera
+print("Initializing Raspberry Pi Camera...")
+picam2 = Picamera2()
 
-# Check if camera opened successfully
-if not cap.isOpened():
-    print("Error: Could not open camera. Please check if:")
-    print("1. Your camera is properly connected")
-    print("2. No other application is using the camera")
-    print("3. You have the necessary permissions to access the camera")
-    sys.exit(1)
+# Configure camera
+preview_config = picam2.create_preview_configuration(main={"size": (640, 480)})
+picam2.configure(preview_config)
 
-# Set camera properties
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-
-# Verify camera properties were set correctly
-width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-print(f"Camera initialized with resolution: {width}x{height}")
+# Start camera
+picam2.start()
+print("Camera started successfully")
 
 model = YOLO("../yoloModels/yolo11n.pt")
 bottle_detected = False
@@ -39,17 +34,15 @@ LAUNCH_COOLDOWN = 5  # Minimum seconds between launches
 
 try:
     while True:
-        ret, frame = cap.read()
-        if not ret:
-            print("Failed to grab frame. Possible causes:")
-            print("1. Camera disconnected")
-            print("2. Camera is being used by another application")
-            print("3. Camera driver issues")
-            break
+        # Capture frame from PiCamera
+        frame = picam2.capture_array()
+        
+        # Convert frame to RGB (YOLO expects RGB)
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # Run YOLO prediction on the frame
         results = model.predict(
-            source=frame,
+            source=frame_rgb,
             show=True,
             conf=0.3,
             classes=[39, 0],  # COCO class index for 'bottle'
@@ -76,6 +69,6 @@ except KeyboardInterrupt:
 except Exception as e:
     print(f"An error occurred: {str(e)}")
 finally:
-    cap.release()
+    picam2.stop()
     cv2.destroyAllWindows()
     sys.exit(0) 
