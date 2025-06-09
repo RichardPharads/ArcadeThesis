@@ -87,9 +87,9 @@ class StartWindow(QWidget):
         layout.addWidget(self.add_token_button)
         self.setLayout(layout)
         
-        # Set window size and position
-        self.setFixedSize(800, 480)
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        # Set window flags for fullscreen
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
+        self.showFullScreen()
         
     def start_token_detection(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
