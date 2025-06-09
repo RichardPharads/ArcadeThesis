@@ -24,7 +24,7 @@ pygame.mixer.music.play(-1)
 
 # Set up display
 clock = pygame.time.Clock()
-SCREEN_WIDTH, SCREEN_HEIGHT = 900, 500
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 480
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
@@ -45,7 +45,7 @@ background = load_image("background", (SCREEN_WIDTH, SCREEN_HEIGHT))
 player_surf = load_image("player", asset_loader.get_scale("player"))
 player_rect = player_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
 player_direction = Vector2()  # For horizontal movement
-player_speed = 400
+player_speed = 350  # Slightly reduced for smaller screen
 facing_right = True  # Track which way player is facing
 player_health = 3
 invincible = False
@@ -55,7 +55,7 @@ invincible_duration = 1.0  # 1 second of invincibility after hit
 # Fire projectile setup
 fire_surf = load_image("projectile", asset_loader.get_scale("projectile"))
 fire_projectiles = []
-fire_speed = 600
+fire_speed = 500  # Adjusted for smaller screen
 fire_cooldown = 0.3  # seconds between shots
 last_fire_time = 0
 
@@ -64,11 +64,11 @@ monster_surf = load_image("monster", asset_loader.get_scale("monster"))
 monsters = []
 monster_spawn_timer = 0
 monster_spawn_interval = 2.0  # seconds between spawns
-monster_speed = 150
+monster_speed = 120  # Adjusted for smaller screen
 
 # Jumping and gravity variables
-gravity = 1200
-jump_height = -600
+gravity = 1000  # Slightly reduced for smaller screen
+jump_height = -500  # Adjusted for smaller screen
 vertical_velocity = 0
 is_jumping = False
 is_on_ground = True
@@ -242,19 +242,19 @@ def update_monsters(dt):
 
 def draw_health():
     """Draw player health as hearts"""
-    heart_surf = pygame.Surface((30, 30), pygame.SRCALPHA)
-    pygame.draw.polygon(heart_surf, (255, 0, 0), [(15, 0), (0, 30), (30, 30)])
-    pygame.draw.circle(heart_surf, (255, 0, 0), (8, 8), 8)
-    pygame.draw.circle(heart_surf, (255, 0, 0), (22, 8), 8)
+    heart_surf = pygame.Surface((25, 25), pygame.SRCALPHA)  # Smaller hearts
+    pygame.draw.polygon(heart_surf, (255, 0, 0), [(12, 0), (0, 25), (25, 25)])
+    pygame.draw.circle(heart_surf, (255, 0, 0), (7, 7), 7)
+    pygame.draw.circle(heart_surf, (255, 0, 0), (18, 7), 7)
 
     for i in range(player_health):
-        screen.blit(heart_surf, (10 + i * 35, 10))
+        screen.blit(heart_surf, (10 + i * 30, 10))  # Adjusted spacing
 
 
 def draw_score():
     """Draw the current score"""
     score_text = font.render(f"Score: {score}", True, (255, 255, 255))
-    screen.blit(score_text, (SCREEN_WIDTH - 150, 10))
+    screen.blit(score_text, (SCREEN_WIDTH - 120, 10))  # Adjusted position
 
 
 def change_theme(new_theme):
