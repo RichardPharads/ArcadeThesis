@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QFrame
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QPalette, QColor
+from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QFrame
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont, QPalette, QColor
 import subprocess
 import sys
 import os
@@ -8,6 +8,7 @@ import os
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+        self.is_launching_game = False
         self.setWindowTitle("Recycle Arcade")
         self.setMinimumSize(800, 480)
         self.setStyleSheet("""
@@ -82,25 +83,29 @@ class MainWindow(QWidget):
         self.setLayout(layout)
 
     def launch_game(self):
+        self.is_launching_game = True
         current_dir = os.path.dirname(os.path.abspath(__file__))
         subprocess.Popen([sys.executable, os.path.join(current_dir, "GameShooter", "asteriodShooter.py")])
-        self.close()
+        self.hide()
 
     def launch_game2(self):
+        self.is_launching_game = True
         current_dir = os.path.dirname(os.path.abspath(__file__))
         subprocess.Popen([sys.executable, os.path.join(current_dir, "Cycleforest", "main.py")])
-        self.close()
+        self.hide()
 
     def launch_game3(self):
+        self.is_launching_game = True
         current_dir = os.path.dirname(os.path.abspath(__file__))
         subprocess.Popen([sys.executable, os.path.join(current_dir, "TrafficDash", "main.py")])
-        self.close()
+        self.hide()
 
     def closeEvent(self, event):
-        subprocess.Popen([sys.executable, "app.py"])
+        if not self.is_launching_game:
+            subprocess.Popen([sys.executable, "app.py"])
         event.accept()
 
 app = QApplication(sys.argv)
 window = MainWindow()
-window.showFullScreen()
+window.show()
 sys.exit(app.exec())

@@ -4,6 +4,8 @@ import random
 from os.path import join
 from pygame.math import Vector2
 from assets_config import AssetLoader
+import os
+import subprocess
 
 # Initialize pygame and mixer
 pygame.init()
@@ -410,4 +412,6 @@ pygame.display.update()
 pygame.time.wait(3000)
 
 pygame.quit()
+# Return to main menu
+subprocess.Popen([sys.executable, os.path.join(os.path.dirname(os.path.dirname(__file__)), "app.py")])
 sys.exit()

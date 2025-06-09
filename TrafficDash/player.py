@@ -1,6 +1,8 @@
 import pygame, sys
 from os import walk
 from utils import get_asset_path
+import subprocess
+import os
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self, pos, groups, collision_sprites):
@@ -43,6 +45,8 @@ class Player(pygame.sprite.Sprite):
 				if sprite.hitbox.colliderect(self.hitbox):
 					if hasattr(sprite, 'name') and sprite.name == 'car':
 						pygame.quit()
+						# Return to main menu
+						subprocess.Popen([sys.executable, os.path.join(os.path.dirname(os.path.dirname(__file__)), "app.py")])
 						sys.exit()
 					if self.direction.x > 0: # moving right
 						self.hitbox.right = sprite.hitbox.left
@@ -57,6 +61,8 @@ class Player(pygame.sprite.Sprite):
 				if sprite.hitbox.colliderect(self.hitbox):
 					if hasattr(sprite, 'name') and sprite.name == 'car':
 						pygame.quit()
+						# Return to main menu
+						subprocess.Popen([sys.executable, os.path.join(os.path.dirname(os.path.dirname(__file__)), "app.py")])
 						sys.exit()
 					if self.direction.y > 0: # moving down
 						self.hitbox.bottom = sprite.hitbox.top

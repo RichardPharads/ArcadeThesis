@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve
+from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel
+from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve
 import subprocess
 import sys
 import os

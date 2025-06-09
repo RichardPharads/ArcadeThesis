@@ -1,4 +1,4 @@
-import pygame, sys, os
+import pygame, sys, os, subprocess
 from random import randint, uniform
 from pygame.locals import *
 
@@ -248,8 +248,18 @@ while True:
         display_surface.blit(assets.graphics['ship'], ship_rect)
         display_score()
     else:
-        # Quit game when game over
+        # Game over screen
+        game_over_text = assets.fonts['main'].render("GAME OVER", True, (255, 255, 255))
+        final_score_text = assets.fonts['main'].render(f"Final Score: {pygame.time.get_ticks() // 1000}", True, (255, 255, 255))
+        display_surface.blit(game_over_text, (WINDOW_WIDTH//2 - game_over_text.get_width()//2, WINDOW_HEIGHT//2 - 50))
+        display_surface.blit(final_score_text, (WINDOW_WIDTH//2 - final_score_text.get_width()//2, WINDOW_HEIGHT//2 + 10))
+        pygame.display.update()
+        
+        # Wait a few seconds before returning to main menu
+        pygame.time.wait(3000)
         pygame.quit()
+        # Return to main menu by launching app.py
+        subprocess.Popen([sys.executable, os.path.join(os.path.dirname(os.path.dirname(__file__)), "app.py")])
         sys.exit()
 
     pygame.display.update()
