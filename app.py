@@ -15,26 +15,26 @@ class StartWindow(QWidget):
             }
             
             QLabel#title {
-                font-size: 32px;
+                font-size: 28px;
                 color: #00ff9d;
                 border: none;
-                padding: 20px;
+                padding: 15px;
                 background-color: rgba(0, 255, 157, 0.1);
-                margin: 20px;
+                margin: 15px;
                 text-align: center;
                 font-weight: bold;
-                border-radius: 15px;
+                border-radius: 12px;
                 letter-spacing: 1px;
             }
             
             QPushButton#add_token {
-                font-size: 22px;
+                font-size: 20px;
                 color: #ffffff;
                 border: none;
-                padding: 20px;
-                border-radius: 12px;
+                padding: 15px;
+                border-radius: 10px;
                 background-color: #00ff9d;
-                margin: 20px;
+                margin: 15px;
                 text-align: center;
                 font-weight: bold;
                 transition: all 0.3s;
@@ -52,19 +52,19 @@ class StartWindow(QWidget):
             }
             
             QLabel#instructions {
-                font-size: 18px;
+                font-size: 16px;
                 color: #ffffff;
-                margin: 15px;
-                padding: 10px;
+                margin: 10px;
+                padding: 8px;
                 background-color: rgba(255, 255, 255, 0.05);
-                border-radius: 10px;
+                border-radius: 8px;
                 text-align: center;
             }
         """)
         
         layout = QVBoxLayout()
-        layout.setSpacing(15)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(10)
+        layout.setContentsMargins(20, 20, 20, 20)
         
         # Title label
         self.title_label = QLabel("Welcome to Recycle Arcade")
@@ -88,7 +88,7 @@ class StartWindow(QWidget):
         self.setLayout(layout)
         
         # Set window size and position
-        self.setMinimumSize(500, 400)
+        self.setFixedSize(800, 480)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         
     def start_token_detection(self):
