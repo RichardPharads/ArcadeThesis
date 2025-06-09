@@ -12,9 +12,25 @@ def launch_main():
     sys.exit(0)
 
 # Initialize camera using OpenCV
-cap = cv2.VideoCapture(0)  # Use 0 for default camera, or try 1,2,etc. for other cameras
+print("Attempting to initialize camera...")
+cap = cv2.VideoCapture(1)  # Try changing 0 to 1 or 2
+
+# Check if camera opened successfully
+if not cap.isOpened():
+    print("Error: Could not open camera. Please check if:")
+    print("1. Your camera is properly connected")
+    print("2. No other application is using the camera")
+    print("3. You have the necessary permissions to access the camera")
+    sys.exit(1)
+
+# Set camera properties
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+# Verify camera properties were set correctly
+width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+print(f"Camera initialized with resolution: {width}x{height}")
 
 model = YOLO("../yoloModels/yolo11n.pt")
 bottle_detected = False
@@ -25,7 +41,10 @@ try:
     while True:
         ret, frame = cap.read()
         if not ret:
-            print("Failed to grab frame")
+            print("Failed to grab frame. Possible causes:")
+            print("1. Camera disconnected")
+            print("2. Camera is being used by another application")
+            print("3. Camera driver issues")
             break
 
         # Run YOLO prediction on the frame
@@ -54,6 +73,8 @@ try:
 
 except KeyboardInterrupt:
     print("\nStopping video capture...")
+except Exception as e:
+    print(f"An error occurred: {str(e)}")
 finally:
     cap.release()
     cv2.destroyAllWindows()
