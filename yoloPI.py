@@ -3,8 +3,7 @@ import subprocess
 import sys
 import os
 import time
-from picamera2 import Picamera2
-from picamera2.previews import Preview
+import cv2
 
 def launch_main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -12,31 +11,34 @@ def launch_main():
     # Close the current script after launching main.py
     sys.exit(0)
 
-# Initialize Pi Camera
-picam2 = Picamera2()
-preview_config = picam2.create_preview_configuration(main={"size": (640, 480)})
-picam2.configure(preview_config)
-picam2.start()
+# Initialize camera using OpenCV
+cap = cv2.VideoCapture(0)  # Use 0 for default camera, or try 1,2,etc. for other cameras
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 model = YOLO("../yoloModels/yolo11n.pt")
 bottle_detected = False
 last_launch_time = 0
 LAUNCH_COOLDOWN = 5  # Minimum seconds between launches
 
-# Start video capture using Pi Camera
-results = model.predict(
-    source=picam2.camera_id,  # Use Pi Camera as source
-    show=True,                # Show the live feed with predictions
-    conf=0.3,                 # Confidence threshold
-    classes=[39, 0],             # COCO class index for 'bottle'
-    stream=True               # Enable real-time streaming
-)
-
 try:
-    # Keep the video stream running
-    for result in results:
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("Failed to grab frame")
+            break
+
+        # Run YOLO prediction on the frame
+        results = model.predict(
+            source=frame,
+            show=True,
+            conf=0.3,
+            classes=[39, 0],  # COCO class index for 'bottle'
+            stream=False
+        )
+
         # Check if any bottles were detected
-        if len(result.boxes) > 0:
+        if len(results[0].boxes) > 0:
             current_time = time.time()
             if not bottle_detected and (current_time - last_launch_time) > LAUNCH_COOLDOWN:
                 bottle_detected = True
@@ -46,7 +48,13 @@ try:
         else:
             bottle_detected = False
 
+        # Break the loop if 'q' is pressed
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
 except KeyboardInterrupt:
     print("\nStopping video capture...")
-    picam2.stop()
+finally:
+    cap.release()
+    cv2.destroyAllWindows()
     sys.exit(0) 

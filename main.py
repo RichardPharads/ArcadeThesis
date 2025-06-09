@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QFrame
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QPalette, QColor
+from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QFrame
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QPalette, QColor
 import subprocess
 import sys
 import os
@@ -9,7 +9,7 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Recycle Arcade")
-        self.setMinimumSize(400, 500)
+        self.setMinimumSize(800, 480)
         self.setStyleSheet("""
             QWidget {
                 background-color: #1a1a2e;
