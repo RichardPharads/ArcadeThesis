@@ -6,8 +6,6 @@ import time
 import cv2
 import numpy as np
 from picamera2 import Picamera2
-from picamera2.encoders import JpegEncoder
-from picamera2.outputs import FileOutput
 
 def launch_main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -19,8 +17,10 @@ def launch_main():
 print("Initializing Raspberry Pi Camera...")
 picam2 = Picamera2()
 
-# Configure camera
-preview_config = picam2.create_preview_configuration(main={"size": (640, 480)})
+# Configure camera with RGB format
+preview_config = picam2.create_preview_configuration(
+    main={"size": (640, 480), "format": "RGB888"}
+)
 picam2.configure(preview_config)
 
 # Start camera
@@ -37,8 +37,11 @@ try:
         # Capture frame from PiCamera
         frame = picam2.capture_array()
         
-        # Convert frame to RGB (YOLO expects RGB)
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # Ensure frame is in the correct format for YOLO
+        if frame.shape[2] == 3:  # If already RGB
+            frame_rgb = frame
+        else:
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # Run YOLO prediction on the frame
         results = model.predict(
