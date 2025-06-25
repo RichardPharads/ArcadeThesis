@@ -1,5 +1,9 @@
-PyQt6==6.6.1
-opencv-python==4.9.0.80
-numpy==1.26.4
-ultralytics==8.1.28 
+PyQt6
+opencv
+pygame
+numpy
+ultralytics
 python3-picamera2
+picamera2
+pillow
+opencv-python
