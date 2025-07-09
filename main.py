@@ -102,7 +102,7 @@ class MainWindow(QWidget):
 
     def closeEvent(self, event):
         if not self.is_launching_game:
-            subprocess.Popen([sys.executable, "yoloRasp.py"])
+            subprocess.Popen([sys.executable, "yolo_raspberry_pi.py"])
         event.accept()
 
 app = QApplication(sys.argv)
