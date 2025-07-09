@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QFrame
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QPalette, QColor
+from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QFrame
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QPalette, QColor
 import subprocess
 import sys
 import os
