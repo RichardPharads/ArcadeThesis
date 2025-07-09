@@ -53,16 +53,15 @@ if USE_PI_CAMERA:
         sys.exit(0)
 else:
     # Fallback to default webcam (USB)
-    results = model.predict(
-        source=0,             # 0 = default webcam
-        show=True,            # Show the live feed with predictions
-        conf=0.3,             # Confidence threshold
-        classes=[39],         # COCO class index for 'bottle'
-        stream=True           # Enable real-time streaming
-    )
     try:
-        for result in results:
-            if len(result.boxes) > 0:
+        for result in model.predict(
+            source=0,             # 0 = default webcam
+            show=True,            # Show the live feed with predictions
+            conf=0.3,             # Confidence threshold
+            classes=[39],         # COCO class index for 'bottle'
+            stream=True           # Enable real-time streaming
+        ):
+            if result and len(result.boxes) > 0:
                 current_time = time.time()
                 if not bottle_detected and (current_time - last_launch_time) > LAUNCH_COOLDOWN:
                     bottle_detected = True
@@ -73,4 +72,7 @@ else:
                 bottle_detected = False
     except KeyboardInterrupt:
         print("\nStopping video capture...")
-        sys.exit(0) 
+        sys.exit(0)
+    except Exception as e:
+        print(f"Error with webcam capture: {e}")
+        sys.exit(1) 
