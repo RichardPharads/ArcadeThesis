@@ -1,9 +1,10 @@
+PySide6>=6.5.0
 PyQt6
-opencv
+opencv-python
 pygame
 numpy
 ultralytics
 python3-picamera2
 picamera2
 pillow
-opencv-python
+opencv-python 
