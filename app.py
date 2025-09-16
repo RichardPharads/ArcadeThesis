@@ -72,7 +72,7 @@ class StartWindow(QWidget):
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         # Instructions label
-        self.instructions = QLabel("Click 'Add Token' and show a bottle to start playing!")
+        self.instructions = QLabel("Click 'Add Token' and place an object near the ultrasonic sensor to start playing!")
         self.instructions.setObjectName("instructions")
         self.instructions.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
@@ -93,7 +93,7 @@ class StartWindow(QWidget):
         
     def start_token_detection(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        subprocess.Popen([sys.executable, os.path.join(current_dir, "yolo.py")])
+        subprocess.Popen([sys.executable, os.path.join(current_dir, "ultrasonic_detector.py")])
         self.close()
 
 if __name__ == "__main__":

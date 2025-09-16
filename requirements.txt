@@ -1,9 +1,4 @@
 PyQt6
-opencv
 pygame
 numpy
-ultralytics
-python3-picamera2
-picamera2
 pillow
-opencv-python

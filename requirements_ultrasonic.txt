@@ -1,0 +1,5 @@
+# Requirements for ultrasonic sensor detection
+RPi.GPIO>=0.7.1
+
+# Note: RPi.GPIO is only available on Raspberry Pi systems
+# For development on other systems, you may need to install a mock version
