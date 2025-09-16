@@ -1,0 +1,77 @@
+ULTRASONIC SENSOR WIRING DIAGRAM
+================================
+
+HC-SR04 Ultrasonic Sensor → Raspberry Pi GPIO
+
+┌─────────────────┐    ┌─────────────────────────────┐
+│   HC-SR04       │    │      Raspberry Pi           │
+│                 │    │                             │
+│  ┌───────────┐  │    │  ┌─────────────────────────┐ │
+│  │    VCC    │──┼────┼──│ Pin 2 (5V)              │ │
+│  └───────────┘  │    │  └─────────────────────────┘ │
+│                 │    │                             │
+│  ┌───────────┐  │    │  ┌─────────────────────────┐ │
+│  │    GND    │──┼────┼──│ Pin 6 (GND)             │ │
+│  └───────────┘  │    │  └─────────────────────────┘ │
+│                 │    │                             │
+│  ┌───────────┐  │    │  ┌─────────────────────────┐ │
+│  │   Trig    │──┼────┼──│ Pin 12 (GPIO 18)        │ │
+│  └───────────┘  │    │  └─────────────────────────┘ │
+│                 │    │                             │
+│  ┌───────────┐  │    │  ┌─────────────────────────┐ │
+│  │   Echo    │──┼────┼──│ Pin 18 (GPIO 24)        │ │
+│  └───────────┘  │    │  └─────────────────────────┘ │
+└─────────────────┘    └─────────────────────────────┘
+
+PIN LAYOUT REFERENCE:
+====================
+
+Raspberry Pi 40-pin GPIO Header:
+
+    3V3  (1) (2)  5V  ←── VCC
+   GPIO2  (3) (4)  5V
+   GPIO3  (5) (6)  GND ←── GND
+   GPIO4  (7) (8)  GPIO14
+     GND  (9) (10) GPIO15
+  GPIO17 (11) (12) GPIO18 ←── TRIG
+  GPIO27 (13) (14) GND
+  GPIO22 (15) (16) GPIO23
+    3V3 (17) (18) GPIO24 ←── ECHO
+  GPIO10 (19) (20) GND
+   GPIO9 (21) (22) GPIO25
+  GPIO11 (23) (24) GPIO8
+     GND (25) (26) GPIO7
+   GPIO0 (27) (28) GPIO1
+   GPIO5 (29) (30) GND
+   GPIO6 (31) (32) GPIO12
+  GPIO13 (33) (34) GND
+  GPIO19 (35) (36) GPIO16
+  GPIO26 (37) (38) GPIO20
+     GND (39) (40) GPIO21
+
+WIRING CHECKLIST:
+================
+□ VCC (HC-SR04) → Pin 2 (5V) on Pi
+□ GND (HC-SR04) → Pin 6 (GND) on Pi  
+□ Trig (HC-SR04) → Pin 12 (GPIO 18) on Pi
+□ Echo (HC-SR04) → Voltage Divider → Pin 18 (GPIO 24) on Pi
+
+VOLTAGE DIVIDER CIRCUIT (REQUIRED):
+===================================
+Echo Pin → 1kΩ Resistor → GPIO 24 (Pi)
+                    ↓
+                2kΩ Resistor
+                    ↓
+                   GND
+
+⚠️  WARNING: Resistors are REQUIRED to protect Pi GPIO pins!
+    HC-SR04 outputs 5V, but Pi GPIO pins are 3.3V only.
+
+TESTING STEPS:
+=============
+1. Power on Raspberry Pi
+2. Connect sensor as shown above
+3. Run: python3 ultrasonic_detector.py
+4. Place hand/object within 30cm of sensor
+5. Verify "OBSTACLE DETECTED!" message
+6. Check that main.py launches automatically
