@@ -290,13 +290,10 @@ class GameLauncher(QMainWindow):
                     sys.executable, str(main_file)
                 ], cwd=str(game_dir))
             
-            # Show success message
-            QMessageBox.information(
-                self,
-                "Game Launched",
-                f"{game_info['name']} is starting up!\n\n"
-                "The game window should appear shortly."
-            )
+            # Show success message and exit
+            # Exit the main application to avoid interference with pygame
+            self.close()
+            sys.exit(0)
             
         except Exception as e:
             QMessageBox.critical(

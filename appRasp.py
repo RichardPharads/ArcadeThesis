@@ -39,14 +39,17 @@ class ArcadeApp:
     def launch_game1(self):
         subprocess.Popen([sys.executable, os.path.join(os.getcwd(), "GameShooter", "asteriodShooter.py")])
         self.root.destroy()
+        sys.exit(0)  # Ensure complete exit
 
     def launch_game2(self):
         subprocess.Popen([sys.executable, os.path.join(os.getcwd(), "Cycleforest", "main.py")])
         self.root.destroy()
+        sys.exit(0)  # Ensure complete exit
 
     def launch_game3(self):
         subprocess.Popen([sys.executable, os.path.join(os.getcwd(), "TrafficDash", "main.py")])
         self.root.destroy()
+        sys.exit(0)  # Ensure complete exit
 
     def start_ultrasonic_detection(self):
         """Start the ultrasonic sensor detection system"""
